@@ -1,0 +1,36 @@
+name: External database backup
+
+on:
+  schedule:
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: external-database-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install --yes postgresql-client
+      - name: Configure restricted AWS role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_BACKUP_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_BACKUP_REGION }}
+      - name: Create and upload encrypted dumps
+        shell: pwsh
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          AWS_BACKUP_BUCKET: ${{ secrets.AWS_BACKUP_BUCKET }}
+          AWS_BACKUP_REGION: ${{ secrets.AWS_BACKUP_REGION }}
+          AWS_KMS_KEY_ARN: ${{ secrets.AWS_KMS_KEY_ARN }}
+        run: ./scripts/backup.ps1

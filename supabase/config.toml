@@ -1,0 +1,4 @@
+project_id = "daily-collection-pro"
+
+[functions.create-collector]
+verify_jwt = true

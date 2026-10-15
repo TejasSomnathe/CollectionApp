@@ -39,6 +39,8 @@ Use `supabase secrets set APP_ORIGIN=https://your-app.example` to configure the 
 
 There is no hardcoded account or password. In the Supabase dashboard, invite the business owner's email through Authentication > Users. The `provision_collector_profile` trigger creates a collector profile. After the owner has accepted the invite, sign in once, confirm the matching Auth user UUID, then run this statement in the Supabase SQL editor as the project owner, replacing the UUID with that verified user's ID:
 
+The follow-up migration `202610150002_backfill_existing_profiles.sql` creates collector profiles for Auth accounts that existed before the trigger was installed. It does not change roles on profiles that already exist. If login reports that a profile row is missing, apply this migration (`supabase db push`, or run this migration's SQL in the Supabase SQL editor after the initial schema migration), then try again.
+
 ```sql
 update public.profiles
 set role = 'admin', active = true

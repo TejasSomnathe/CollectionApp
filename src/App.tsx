@@ -173,6 +173,8 @@ export default function App() {
           setAuthError(
             data?.active === false
               ? 'This account is inactive. Contact an administrator.'
+              : profileError?.code === 'PGRST116'
+                ? 'This Auth account has no profile yet. Ask the project owner to apply the profile backfill migration.'
               : (profileError?.message ?? 'Profile unavailable.'),
           )
           await client.auth.signOut()

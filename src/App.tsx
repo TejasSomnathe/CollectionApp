@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import type { Session } from '@supabase/supabase-js'
+import { FunctionsHttpError, type Session } from '@supabase/supabase-js'
 import {
   Activity,
   ArrowDownToLine,
@@ -2081,7 +2081,12 @@ function Team({ collectors, onSaved }: { collectors: Profile[]; onSaved: () => P
     })
     setSaving(false)
     if (inviteError) {
-      setError(inviteError.message)
+      if (inviteError instanceof FunctionsHttpError) {
+        const response = (await inviteError.context.json()) as { error?: unknown }
+        setError(typeof response.error === 'string' ? response.error : inviteError.message)
+      } else {
+        setError(inviteError.message)
+      }
       return
     }
     setName('')
